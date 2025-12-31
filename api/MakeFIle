@@ -1,0 +1,13 @@
+ifneq (, $(wildcard ./.env)) 
+	include .env
+	export
+endif
+
+migrate-up:
+	migrate -path db/migrations -database "$(DB_URL)" up
+
+migrate-down:
+	migrate -path db/migrations -database "$(DB_URL)" down
+
+.PHONY run build \
+	migrate-up migrate-down
