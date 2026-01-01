@@ -1,12 +1,14 @@
 package main
 
 import (
-	"log/slog"
 	"context"
-	"github.com/mgjk88/cvwo-winter-assignment/api/pkg/db"
-	"github.com/mgjk88/cvwo-winter-assignment/api/internal/user"
+	"log/slog"
 	"os"
+
 	"github.com/gin-gonic/gin"
+	"github.com/mgjk88/cvwo-winter-assignment/api/internal/topic"
+	"github.com/mgjk88/cvwo-winter-assignment/api/internal/user"
+	"github.com/mgjk88/cvwo-winter-assignment/api/pkg/db"
 )
 
 //TODO: implement logging using slog later
@@ -35,10 +37,13 @@ func main() {
 
 	//init repos
 	userRepo := user.NewUserRepo(pool)
+	topicRepo := topic.NewTopicRepo(pool)
 	//init svcs
 	userSvc := user.NewUserSvc(userRepo)
+	topicSvc := topic.NewTopicSvc(topicRepo)
 	//init handlers
 	userHandler := user.NewUserHandler(userSvc)
+	topicHandler := topic.NewTopicHandler(topicSvc)
 
 
 	r := gin.Default()
@@ -46,5 +51,12 @@ func main() {
 	users.GET("/:userId", userHandler.GetUser)
 	users.POST("/", userHandler.CreateUser)
 	users.DELETE("/:userId", userHandler.DeleteUser)
+
+	topics := r.Group("/topics")
+	topics.GET("/:topicId", topicHandler.GetTopic)
+	topics.GET("/", topicHandler.GetTopics)
+	topics.POST("/", topicHandler.CreateTopic)
+	topics.PUT("/:topicId", topicHandler.UpdateTopic)
+	topics.DELETE("/:topicId", topicHandler.DeleteTopic)
 	r.Run()
 }
