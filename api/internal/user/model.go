@@ -9,5 +9,10 @@ type User struct {
 	ID uuid.UUID `json:"id"`
 	Username string `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
-	DeletedAt time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
+}
+
+//DTOs vvv
+type UserCreateReq struct {
+	Username string `json:"username" binding:"required"`
 }

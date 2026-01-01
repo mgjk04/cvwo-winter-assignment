@@ -3,11 +3,16 @@ ifneq (, $(wildcard ./.env))
 	export
 endif
 
+dev:
+	go run ./cmd/server/main.go
+
 migrate-up:
 	migrate -path db/migrations -database "$(DB_URL)" up
 
 migrate-down:
 	migrate -path db/migrations -database "$(DB_URL)" down
+migrate-force:
+	migrate -path db/migrations -database "$(DB_URL)" force $(DB_VERSION)
 
-.PHONY run build \
+.PHONY: run dev build \
 	migrate-up migrate-down

@@ -1,4 +1,4 @@
-module github.com/mgjk88/cvwo-winter-assignment
+module github.com/mgjk88/cvwo-winter-assignment/api
 
 go 1.25.5
 
