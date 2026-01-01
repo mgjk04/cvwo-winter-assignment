@@ -13,3 +13,22 @@ type Post struct {
 	TopicID uuid.UUID `json:"topic_id"`
 	AuthorID uuid.UUID `json:"author_id"`
 }
+
+type SearchQuery struct {
+	Page int `form:"page,default=1" binding:"gt=0"`
+	Limit int `form:"limit,default=10" binding:"gt=0"`
+}
+
+//DTOs
+type PostCreateReq struct {
+	Title string `json:"title" binding:"required"`
+	Description string `json:"description" binding:"omitempty"`
+	AuthorID uuid.UUID `json:"author_id" binding:"required"`
+	//topic_id not required as it is part of the route params
+}
+type PostUpdateReq struct {
+	TopicName string `json:"topicname" binding:"required"`
+	Description string `json:"description" binding:"omitempty"`
+	TopicID uuid.UUID `json:"topic_id" binding:"required"`
+	AuthorID uuid.UUID `json:"author_id" binding:"required"`
+}

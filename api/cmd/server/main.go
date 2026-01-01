@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mgjk88/cvwo-winter-assignment/api/internal/post"
 	"github.com/mgjk88/cvwo-winter-assignment/api/internal/topic"
 	"github.com/mgjk88/cvwo-winter-assignment/api/internal/user"
 	"github.com/mgjk88/cvwo-winter-assignment/api/pkg/db"
@@ -38,25 +39,39 @@ func main() {
 	//init repos
 	userRepo := user.NewUserRepo(pool)
 	topicRepo := topic.NewTopicRepo(pool)
+	postRepo := post.NewPostRepo(pool)
 	//init svcs
 	userSvc := user.NewUserSvc(userRepo)
 	topicSvc := topic.NewTopicSvc(topicRepo)
+	postSvc := post.NewPostSvc(postRepo)
 	//init handlers
 	userHandler := user.NewUserHandler(userSvc)
 	topicHandler := topic.NewTopicHandler(topicSvc)
+	postHandler := post.NewPostHandler(postSvc)
 
 
 	r := gin.Default()
+	//users
 	users := r.Group("/users")
 	users.GET("/:userId", userHandler.GetUser)
 	users.POST("/", userHandler.CreateUser)
 	users.DELETE("/:userId", userHandler.DeleteUser)
 
+	//topics
 	topics := r.Group("/topics")
 	topics.GET("/:topicId", topicHandler.GetTopic)
 	topics.GET("/", topicHandler.GetTopics)
 	topics.POST("/", topicHandler.CreateTopic)
 	topics.PUT("/:topicId", topicHandler.UpdateTopic)
 	topics.DELETE("/:topicId", topicHandler.DeleteTopic)
+
+	//posts
+	topics.GET("/:topicId/posts", postHandler.GetPosts)
+	topics.POST("/:topicId/posts", postHandler.CreatePost)
+
+	posts := r.Group("/posts")
+	posts.GET("/:postId", postHandler.GetPost)
+	posts.PUT("/:postId", postHandler.UpdatePost)
+	posts.DELETE("/:postId", postHandler.DeletePost)
 	r.Run()
 }
