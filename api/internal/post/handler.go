@@ -11,6 +11,7 @@ type Handler interface {
 	GetPost(ctx *gin.Context)
 	GetPosts(ctx *gin.Context)
 	CreatePost(ctx *gin.Context)
+	UpdatePost(ctx *gin.Context)
 	DeletePost(ctx *gin.Context)
 }
 
@@ -86,13 +87,13 @@ func (h *postHandler) UpdatePost(ctx *gin.Context){
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
-	err = h.s.UpdatePost(ctx, &Post{ID: postID, Title: req.TopicName, Description: req.Description, TopicID: req.TopicID, AuthorID: req.AuthorID})
+	err = h.s.UpdatePost(ctx, &Post{ID: postID, Title: req.Title, Description: req.Description, TopicID: req.TopicID, AuthorID: req.AuthorID})
 	if err != nil {
 		slog.Error(err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update topic"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "post updated successfully"})
+	ctx.Status(http.StatusNoContent)
 }
 func (h *postHandler) DeletePost(ctx *gin.Context){
 	postID, err := uuid.Parse(ctx.Param("postId"))
@@ -105,7 +106,7 @@ func (h *postHandler) DeletePost(ctx *gin.Context){
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete post"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "post deleted successfully"})
+	ctx.Status(http.StatusNoContent)
 }
 
 func NewPostHandler(s Service) *postHandler {

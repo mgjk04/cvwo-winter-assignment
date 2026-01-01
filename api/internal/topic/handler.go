@@ -11,6 +11,7 @@ type Handler interface {
 	GetTopic(ctx *gin.Context)
 	GetTopics(ctx *gin.Context)
 	CreateTopic(ctx *gin.Context)
+	UpdateTopic(ctx *gin.Context)
 	DeleteTopic(ctx *gin.Context)
 }
 
@@ -93,7 +94,7 @@ func (h *topicHandler) UpdateTopic(ctx *gin.Context){
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update topic"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "topic updated successfully"})
+	ctx.Status(http.StatusNoContent)
 }
 func (h *topicHandler) DeleteTopic(ctx *gin.Context){
 	topicID, err := uuid.Parse(ctx.Param("topicId"))
@@ -106,7 +107,7 @@ func (h *topicHandler) DeleteTopic(ctx *gin.Context){
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete topic"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "topic deleted successfully"})
+	ctx.Status(http.StatusNoContent)
 }
 
 func NewTopicHandler(s Service) *topicHandler {

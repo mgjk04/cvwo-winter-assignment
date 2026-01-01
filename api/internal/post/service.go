@@ -8,7 +8,7 @@ import (
 type Service interface {
 	CreatePost(ctx context.Context, p *Post) (uuid.UUID, error)
 	UpdatePost(ctx context.Context, p *Post) error
-	FindPosts(ctx context.Context, topicID uuid.UUID, page int, pageSize int) ([]*Post, error)
+	FindPosts(ctx context.Context, topicID uuid.UUID, page int, limit int) ([]*Post, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*Post, error)
 	DeletePost(ctx context.Context, id uuid.UUID) error
 }

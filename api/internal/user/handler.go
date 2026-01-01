@@ -71,7 +71,7 @@ func (h *userHandler) DeleteUser(ctx *gin.Context){
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete user"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
+	ctx.Status(http.StatusNoContent)
 }
 
 func NewUserHandler(s Service) *userHandler {

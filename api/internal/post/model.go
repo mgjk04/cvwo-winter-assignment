@@ -27,7 +27,7 @@ type PostCreateReq struct {
 	//topic_id not required as it is part of the route params
 }
 type PostUpdateReq struct {
-	TopicName string `json:"topicname" binding:"required"`
+	Title string `json:"title" binding:"required"`
 	Description string `json:"description" binding:"omitempty"`
 	TopicID uuid.UUID `json:"topic_id" binding:"required"`
 	AuthorID uuid.UUID `json:"author_id" binding:"required"`

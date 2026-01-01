@@ -4,18 +4,17 @@ import (
 	"context"
 	"log/slog"
 	"os"
-
 	"github.com/gin-gonic/gin"
+	"github.com/mgjk88/cvwo-winter-assignment/api/internal/comment"
 	"github.com/mgjk88/cvwo-winter-assignment/api/internal/post"
 	"github.com/mgjk88/cvwo-winter-assignment/api/internal/topic"
 	"github.com/mgjk88/cvwo-winter-assignment/api/internal/user"
 	"github.com/mgjk88/cvwo-winter-assignment/api/pkg/db"
 )
 
-//TODO: implement logging using slog later
 func main() {
 	//env variables
-	//addr := os.Getenv("ADDR")
+	addr := os.Getenv("ADDR")
 	dbURL := os.Getenv("DB_URL")
 	// env := os.Getenv("ENV")
 	// if env == "DEV" {
@@ -40,14 +39,17 @@ func main() {
 	userRepo := user.NewUserRepo(pool)
 	topicRepo := topic.NewTopicRepo(pool)
 	postRepo := post.NewPostRepo(pool)
+	commentRepo := comment.NewCommentRepo(pool)
 	//init svcs
 	userSvc := user.NewUserSvc(userRepo)
 	topicSvc := topic.NewTopicSvc(topicRepo)
 	postSvc := post.NewPostSvc(postRepo)
+	commentSvc := comment.NewCommentSvc(commentRepo)
 	//init handlers
 	userHandler := user.NewUserHandler(userSvc)
 	topicHandler := topic.NewTopicHandler(topicSvc)
 	postHandler := post.NewPostHandler(postSvc)
+	commentHandler := comment.NewCommentHandler(commentSvc)
 
 
 	r := gin.Default()
@@ -73,5 +75,14 @@ func main() {
 	posts.GET("/:postId", postHandler.GetPost)
 	posts.PUT("/:postId", postHandler.UpdatePost)
 	posts.DELETE("/:postId", postHandler.DeletePost)
-	r.Run()
+
+	//comments
+	posts.GET("/:postId/comments", commentHandler.GetComments)
+	posts.POST("/:postId/comments", commentHandler.CreateComment)
+
+	comments := r.Group("/comments")
+	comments.GET("/:commentId", commentHandler.GetComment)
+	comments.PUT("/:commentId", commentHandler.UpdateComment)
+	comments.DELETE("/:commentId", commentHandler.DeleteComment)
+	r.Run(addr)
 }

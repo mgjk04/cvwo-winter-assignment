@@ -1,4 +1,4 @@
-package post
+package comment
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrPostNotFound = errors.New("post not found")
+	ErrCommentNotFound = errors.New("comment not found")
 	ErrUncaught	 = errors.New("uncaught error")
 )
 //TODO: refactor this below
@@ -21,7 +21,7 @@ func HandleError(err error) error {
 	// 	}
 	// }
 	if errors.Is(err, pgx.ErrNoRows) {
-		return ErrPostNotFound
+		return ErrCommentNotFound
 	}
 	//default case, just return the original error wrapped with generic
 	return errors.Join(ErrUncaught, err)
