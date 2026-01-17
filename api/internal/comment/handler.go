@@ -1,10 +1,10 @@
 package comment
 
 import (
-	"log/slog"
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/mgjk04/cvwo-winter-assignment/api/internal/generalErrors"
 )
 
 type Handler interface {
@@ -26,20 +26,13 @@ type commentHandler struct {
 func (h *commentHandler) GetComment(ctx *gin.Context) {
 	commentID, err := uuid.Parse(ctx.Param("commentId"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment ID"})
+		ctx.Error(generalErrors.ErrInvalid)
 		return
 	} 
 	comment, err := h.s.FindByID(ctx, commentID)
 	if err != nil {
-		slog.Error(err.Error())
-		switch err {
-			case ErrCommentNotFound:
-				ctx.JSON(http.StatusNotFound, gin.H{"error": "comment not found"})
-				return
-			case ErrUncaught:
-				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-				return
-		}
+		ctx.Error(err)
+		return
 	}
 	
 	ctx.JSON(http.StatusOK, comment)
@@ -49,61 +42,88 @@ func (h *commentHandler) GetComments(ctx *gin.Context) {
 	var query SearchQuery
 	postID, err := uuid.Parse(ctx.Param("postId"))
 	if err := ctx.ShouldBindQuery(&query); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid query parameters"})
+		ctx.Error(generalErrors.ErrInvalid)
 		return
 	}
 	comments, err := h.s.FindComments(ctx, postID, query.Page, query.Limit)
 	if err != nil {
-		slog.Error(err.Error())
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get comments"})
+		ctx.Error(err)
 		return
 	}
 	ctx.JSON(http.StatusOK, comments)
 }
 
 func (h *commentHandler) CreateComment(ctx *gin.Context){
-	postID, err := uuid.Parse(ctx.Param("postId"))
-	req := &CommentCreateReq{}
-	if err := ctx.Bind(req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.Error(generalErrors.ErrUnauthorized)
 		return
 	}
-	commentID, err := h.s.CreateComment(ctx, &Comment{Content: req.Content, PostID: postID, AuthorID: req.AuthorID})
+	parsedUserID, err := uuid.Parse(userID.(string))
 	if err != nil {
-		slog.Error(err.Error())
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create comment"})
+		ctx.Error(generalErrors.ErrInvalid)
+		return
+	} 
+	postID, err := uuid.Parse(ctx.Param("postId"))
+	req := &CommentCreateReq{}
+	if err := ctx.ShouldBind(req); err != nil {
+		ctx.Error(generalErrors.ErrInvalid)
+		return
+	}
+	commentID, err := h.s.CreateComment(ctx, &Comment{Content: req.Content, PostID: postID, AuthorID: parsedUserID})
+	if err != nil {
+		ctx.Error(err)
 		return
 	}
 	ctx.JSON(http.StatusCreated, gin.H{"id": commentID})
 }
 func (h *commentHandler) UpdateComment(ctx *gin.Context){
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.Error(generalErrors.ErrUnauthorized)
+		return
+	}
+	parsedUserID, err := uuid.Parse(userID.(string))
+	if err != nil {
+		ctx.Error(generalErrors.ErrInvalid)
+		return
+	} 
 	commentID, err := uuid.Parse(ctx.Param("commentId"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment ID"})
+		ctx.Error(generalErrors.ErrInvalid)
 		return
 	}
 	req := &CommentUpdateReq{}
-	if err := ctx.Bind(req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+	if err := ctx.ShouldBind(req); err != nil {
+		ctx.Error(generalErrors.ErrInvalid)
 		return
 	}
-	err = h.s.UpdateComment(ctx, &Comment{ID: commentID, Content: req.Content, PostID: req.PostID, AuthorID: req.AuthorID})
+	err = h.s.UpdateComment(ctx, parsedUserID, &Comment{ID: commentID, Content: req.Content, PostID: req.PostID, AuthorID: req.AuthorID})
 	if err != nil {
-		slog.Error(err.Error())
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update comment"})
+		ctx.Error(err)
 		return
 	}
 	ctx.Status(http.StatusNoContent)
 }
 func (h *commentHandler) DeleteComment(ctx *gin.Context){
-	commentID, err := uuid.Parse(ctx.Param("commentId"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid comment ID"})
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.Error(generalErrors.ErrUnauthorized)
 		return
 	}
-	err = h.s.DeleteComment(ctx, commentID)
+	parsedUserID, err := uuid.Parse(userID.(string))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete comment"})
+		ctx.Error(generalErrors.ErrInvalid)
+		return
+	} 
+	commentID, err := uuid.Parse(ctx.Param("commentId"))
+	if err != nil {
+		ctx.Error(generalErrors.ErrInvalid)
+		return
+	}
+	err = h.s.DeleteComment(ctx, parsedUserID, commentID)
+	if err != nil {
+		ctx.Error(err)
 		return
 	}
 	ctx.Status(http.StatusNoContent)

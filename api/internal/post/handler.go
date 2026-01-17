@@ -1,10 +1,10 @@
 package post
 
 import (
-	"log/slog"
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/mgjk04/cvwo-winter-assignment/api/internal/generalErrors"
 )
 
 type Handler interface {
@@ -26,20 +26,12 @@ type postHandler struct {
 func (h *postHandler) GetPost(ctx *gin.Context) {
 	postID, err := uuid.Parse(ctx.Param("postId"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid post ID"})
+		ctx.Error(generalErrors.ErrInvalid)
 		return
 	} 
 	post, err := h.s.FindByID(ctx, postID)
 	if err != nil {
-		slog.Error(err.Error())
-		switch err {
-			case ErrPostNotFound:
-				ctx.JSON(http.StatusNotFound, gin.H{"error": "post not found"})
-				return
-			case ErrUncaught:
-				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-				return
-		}
+		ctx.Error(err)
 	}
 	
 	ctx.JSON(http.StatusOK, post)
@@ -49,61 +41,88 @@ func (h *postHandler) GetPosts(ctx *gin.Context) {
 	var query SearchQuery
 	topicID, err := uuid.Parse(ctx.Param("topicId"))
 	if err := ctx.ShouldBindQuery(&query); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid query parameters"})
+		ctx.Error(generalErrors.ErrInvalid)
 		return
 	}
 	posts, err := h.s.FindPosts(ctx, topicID, query.Page, query.Limit)
 	if err != nil {
-		slog.Error(err.Error())
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get posts"})
+		ctx.Error(err)
 		return
 	}
 	ctx.JSON(http.StatusOK, posts)
 }
 
 func (h *postHandler) CreatePost(ctx *gin.Context){
-	topicID, err := uuid.Parse(ctx.Param("topicId"))
-	req := &PostCreateReq{}
-	if err := ctx.Bind(req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.Error(generalErrors.ErrUnauthorized)
 		return
 	}
-	postID, err := h.s.CreatePost(ctx, &Post{Title: req.Title, Description: req.Description, TopicID: topicID, AuthorID: req.AuthorID})
+	parsedUserID, err := uuid.Parse(userID.(string))
 	if err != nil {
-		slog.Error(err.Error())
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
+		ctx.Error(generalErrors.ErrInvalid)
+		return
+	} 
+	topicID, err := uuid.Parse(ctx.Param("topicId"))
+	req := &PostCreateReq{}
+	if err := ctx.ShouldBind(req); err != nil {
+		ctx.Error(generalErrors.ErrInvalid)
+		return
+	}
+	postID, err := h.s.CreatePost(ctx, &Post{Title: req.Title, Description: req.Description, TopicID: topicID, AuthorID: parsedUserID})
+	if err != nil {
+		ctx.Error(err)
 		return
 	}
 	ctx.JSON(http.StatusCreated, gin.H{"id": postID})
 }
 func (h *postHandler) UpdatePost(ctx *gin.Context){
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.Error(generalErrors.ErrUnauthorized)
+		return
+	}
+	parsedUserID, err := uuid.Parse(userID.(string))
+	if err != nil {
+		ctx.Error(generalErrors.ErrInvalid)
+		return
+	} 
 	postID, err := uuid.Parse(ctx.Param("postId"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+		ctx.Error(generalErrors.ErrInvalid)
 		return
 	}
 	req := &PostUpdateReq{}
-	if err := ctx.Bind(req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+	if err := ctx.ShouldBind(req); err != nil {
+		ctx.Error(generalErrors.ErrInvalid)
 		return
 	}
-	err = h.s.UpdatePost(ctx, &Post{ID: postID, Title: req.Title, Description: req.Description, TopicID: req.TopicID, AuthorID: req.AuthorID})
+	err = h.s.UpdatePost(ctx, parsedUserID, &Post{ID: postID, Title: req.Title, Description: req.Description, TopicID: req.TopicID, AuthorID: req.AuthorID})
 	if err != nil {
-		slog.Error(err.Error())
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update topic"})
+		ctx.Error(err)
 		return
 	}
 	ctx.Status(http.StatusNoContent)
 }
 func (h *postHandler) DeletePost(ctx *gin.Context){
-	postID, err := uuid.Parse(ctx.Param("postId"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.Error(generalErrors.ErrUnauthorized)
 		return
 	}
-	err = h.s.DeletePost(ctx, postID)
+	parsedUserID, err := uuid.Parse(userID.(string))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete post"})
+		ctx.Error(generalErrors.ErrInvalid)
+		return
+	} 
+	postID, err := uuid.Parse(ctx.Param("postId"))
+	if err != nil {
+		ctx.Error(generalErrors.ErrInvalid)
+		return
+	}
+	err = h.s.DeletePost(ctx, parsedUserID, postID)
+	if err != nil {
+		ctx.Error(err)	
 		return
 	}
 	ctx.Status(http.StatusNoContent)

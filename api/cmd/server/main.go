@@ -4,18 +4,23 @@ import (
 	"context"
 	"log/slog"
 	"os"
+
 	"github.com/gin-gonic/gin"
-	"github.com/mgjk88/cvwo-winter-assignment/api/internal/comment"
-	"github.com/mgjk88/cvwo-winter-assignment/api/internal/post"
-	"github.com/mgjk88/cvwo-winter-assignment/api/internal/topic"
-	"github.com/mgjk88/cvwo-winter-assignment/api/internal/user"
-	"github.com/mgjk88/cvwo-winter-assignment/api/pkg/db"
+	"github.com/mgjk04/cvwo-winter-assignment/api/internal/auth"
+	"github.com/mgjk04/cvwo-winter-assignment/api/internal/comment"
+	"github.com/mgjk04/cvwo-winter-assignment/api/internal/middleware"
+	"github.com/mgjk04/cvwo-winter-assignment/api/internal/post"
+	"github.com/mgjk04/cvwo-winter-assignment/api/internal/topic"
+	"github.com/mgjk04/cvwo-winter-assignment/api/internal/user"
+	"github.com/mgjk04/cvwo-winter-assignment/api/pkg/db"
 )
 
 func main() {
 	//env variables
 	addr := os.Getenv("ADDR")
 	dbURL := os.Getenv("DB_URL")
+	accessSecret := os.Getenv("ACCESS_SECRET")
+	refreshSecret := os.Getenv("REFRESH_SECRET")
 	// env := os.Getenv("ENV")
 	// if env == "DEV" {
 	// 	gin.SetMode(gin.DebugMode)
@@ -45,27 +50,40 @@ func main() {
 	topicSvc := topic.NewTopicSvc(topicRepo)
 	postSvc := post.NewPostSvc(postRepo)
 	commentSvc := comment.NewCommentSvc(commentRepo)
+	authSvc := auth.NewAuthSvc(userSvc, accessSecret, refreshSecret)
 	//init handlers
 	userHandler := user.NewUserHandler(userSvc)
 	topicHandler := topic.NewTopicHandler(topicSvc)
 	postHandler := post.NewPostHandler(postSvc)
 	commentHandler := comment.NewCommentHandler(commentSvc)
+	authHandler := auth.NewAuthHandler(authSvc)
 
+	//auth middleware
+	authMiddleware := middleware.AuthMiddleware(authSvc)
 
 	r := gin.Default()
+	r.Use(middleware.ErrorHandler())
+
+	//auth
+	r.POST("/login",authHandler.Login)
+	r.POST("/logout",authHandler.Logout)
+	r.POST("/signup",authHandler.Signup)
+
+	r.POST("/refresh", authMiddleware, authHandler.Refresh)
+
 	//users
 	users := r.Group("/users")
 	users.GET("/:userId", userHandler.GetUser)
-	users.POST("/", userHandler.CreateUser)
-	users.DELETE("/:userId", userHandler.DeleteUser)
+	users.POST("/", authMiddleware, userHandler.CreateUser)
+	users.DELETE("/:userId", authMiddleware, userHandler.DeleteUser)
 
 	//topics
 	topics := r.Group("/topics")
 	topics.GET("/:topicId", topicHandler.GetTopic)
 	topics.GET("/", topicHandler.GetTopics)
-	topics.POST("/", topicHandler.CreateTopic)
-	topics.PUT("/:topicId", topicHandler.UpdateTopic)
-	topics.DELETE("/:topicId", topicHandler.DeleteTopic)
+	topics.POST("/", authMiddleware, topicHandler.CreateTopic)
+	topics.PUT("/:topicId",authMiddleware, topicHandler.UpdateTopic)
+	topics.DELETE("/:topicId", authMiddleware, topicHandler.DeleteTopic)
 
 	//posts
 	topics.GET("/:topicId/posts", postHandler.GetPosts)
@@ -73,16 +91,16 @@ func main() {
 
 	posts := r.Group("/posts")
 	posts.GET("/:postId", postHandler.GetPost)
-	posts.PUT("/:postId", postHandler.UpdatePost)
-	posts.DELETE("/:postId", postHandler.DeletePost)
+	posts.PUT("/:postId", authMiddleware, postHandler.UpdatePost)
+	posts.DELETE("/:postId",authMiddleware, postHandler.DeletePost)
 
 	//comments
 	posts.GET("/:postId/comments", commentHandler.GetComments)
-	posts.POST("/:postId/comments", commentHandler.CreateComment)
+	posts.POST("/:postId/comments", authMiddleware, commentHandler.CreateComment)
 
 	comments := r.Group("/comments")
 	comments.GET("/:commentId", commentHandler.GetComment)
-	comments.PUT("/:commentId", commentHandler.UpdateComment)
-	comments.DELETE("/:commentId", commentHandler.DeleteComment)
+	comments.PUT("/:commentId", authMiddleware, commentHandler.UpdateComment)
+	comments.DELETE("/:commentId", authMiddleware, commentHandler.DeleteComment)
 	r.Run(addr)
 }

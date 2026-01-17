@@ -14,7 +14,6 @@ type Service interface {
 
 type userSvc struct {
 	r Repo 
-	//future auth service can be added later
 }
 
 func (s *userSvc) RegisterUser(ctx context.Context, username string) (uuid.UUID, error) {

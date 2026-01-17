@@ -22,7 +22,6 @@ type SearchQuery struct {
 type TopicCreateReq struct {
 	TopicName string `json:"topicname" binding:"required"`
 	Description string `json:"description" binding:"omitempty"`
-	AuthorID uuid.UUID `json:"author_id" binding:"required"`
 }
 //ok thinking about it they're like the same, I'll keep it here for now
 type TopicUpdateReq struct {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mgjk04/cvwo-winter-assignment/api/internal/generalErrors"
 )
 
 type Repo interface {
@@ -21,14 +22,14 @@ func (r *userRepo) Create(ctx context.Context, u *User) (uuid.UUID, error) {
 	query := `INSERT INTO users (username) VALUES ($1) RETURNING id`
 	var id uuid.UUID
 	err := r.db.QueryRow(ctx, query, u.Username).Scan(&id)
-	return id, HandleError(err)
+	return id, generalErrors.PostgresqlErrorMap(err)
 }
 
 func (r *userRepo) ReadByUsername(ctx context.Context, username string) (*User, error) {
 	query := `SELECT id, created_at, deleted_at FROM users WHERE username=$1 AND deleted_at IS NULL`
 	u := &User{Username: username}
 	err := r.db.QueryRow(ctx, query, username).Scan(&u.ID, &u.CreatedAt, &u.DeletedAt)
-	return u, HandleError(err)
+	return u, generalErrors.PostgresqlErrorMap(err)
 }
 
 func (r *userRepo) ReadByID(ctx context.Context, id uuid.UUID) (*User, error) {
@@ -36,7 +37,7 @@ func (r *userRepo) ReadByID(ctx context.Context, id uuid.UUID) (*User, error) {
 	u := &User{ID: id}
 	err := r.db.QueryRow(ctx, query, id).Scan(&u.Username, &u.CreatedAt, &u.DeletedAt)
 	if err != nil {
-		return nil, HandleError(err)
+		return nil, generalErrors.PostgresqlErrorMap(err)
 	}
 	return u, err
 }
@@ -44,7 +45,7 @@ func (r *userRepo) ReadByID(ctx context.Context, id uuid.UUID) (*User, error) {
 func (r *userRepo) DeleteByID(ctx context.Context, id uuid.UUID) error {
 	query := `UPDATE users SET deleted_at=NOW() WHERE id=$1`
 	_, err := r.db.Exec(ctx, query, id)
-	return HandleError(err)
+	return generalErrors.PostgresqlErrorMap(err)
 }
 
 func NewUserRepo(db *pgxpool.Pool) *userRepo {

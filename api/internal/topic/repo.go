@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mgjk04/cvwo-winter-assignment/api/internal/generalErrors"
 )
 
 //NOTE: add tx.rollback if extension logic requires mutliple queries
@@ -24,14 +25,14 @@ func (r *topicRepo) Create(ctx context.Context, t *Topic) (uuid.UUID, error) {
 	query := `INSERT INTO topics (topicname, description, author_id) VALUES ($1, $2, $3) RETURNING id`
 	var id uuid.UUID
 	err := r.db.QueryRow(ctx, query, t.TopicName, t.Description, t.AuthorID).Scan(&id)
-	return id, HandleError(err)
+	return id, generalErrors.PostgresqlErrorMap(err)
 }
 
 func (r *topicRepo) ReadMany(ctx context.Context, page int, limit int) ([]*Topic, error) {
 	query := `SELECT id, topicname, description, created_at, author_id FROM topics ORDER BY created_at DESC LIMIT $1 OFFSET $2 `
 	rows, err := r.db.Query(ctx, query, limit, (page - 1) * limit)
 	if err != nil {
-		return nil, HandleError(err)
+		return nil, generalErrors.PostgresqlErrorMap(err)
 	}
 	defer rows.Close()
 	topics := []*Topic{}
@@ -39,7 +40,7 @@ func (r *topicRepo) ReadMany(ctx context.Context, page int, limit int) ([]*Topic
 		t := &Topic{}
 		err := rows.Scan(&t.ID, &t.TopicName, &t.Description, &t.CreatedAt, &t.AuthorID)
 		if err != nil {
-			return nil, HandleError(err)
+			return nil, generalErrors.PostgresqlErrorMap(err)
 		}
 		topics = append(topics, t)
 	}
@@ -50,19 +51,19 @@ func (r *topicRepo) ReadByID(ctx context.Context, id uuid.UUID) (*Topic, error) 
 	query := `SELECT topicname, description, created_at, author_id FROM topics WHERE id=$1`
 	t := &Topic{ID: id}
 	err := r.db.QueryRow(ctx, query, id).Scan(&t.TopicName, &t.Description, &t.CreatedAt, &t.AuthorID)
-	return t, HandleError(err)
+	return t, generalErrors.PostgresqlErrorMap(err)
 }
 
 func (r *topicRepo) UpdateByID(ctx context.Context, t *Topic) error {
 	query := `UPDATE topics SET topicname=$2, description=$3, author_id=$4 WHERE id=$1`
 	_, err := r.db.Exec(ctx, query, t.ID, t.TopicName, t.Description, t.AuthorID)
-	return HandleError(err)
+	return generalErrors.PostgresqlErrorMap(err)
 }
 
 func (r *topicRepo) DeleteByID(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM topics WHERE id=$1`
 	_, err := r.db.Exec(ctx, query, id)
-	return HandleError(err)
+	return generalErrors.PostgresqlErrorMap(err)
 }
 
 func NewTopicRepo(db *pgxpool.Pool) *topicRepo {
