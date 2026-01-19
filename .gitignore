@@ -1,1 +1,41 @@
-.env
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+go-gossip/node_modules
+go-gossip/.pnp
+go-gossip/.pnp.*
+go-gossip/.yarn/*
+go-gossip/!.yarn/patches
+go-gossip/!.yarn/plugins
+go-gossip/!.yarn/releases
+go-gossip/!.yarn/versions
+
+# testing
+go-gossip/coverage
+
+# next.js
+go-gossip/.next/
+go-gossip/out/
+
+# production
+go-gossip/build
+
+# misc
+go-gossip/.DS_Store
+go-gossip/*.pem
+
+# debug
+go-gossip/npm-debug.log*
+go-gossip/yarn-debug.log*
+go-gossip/yarn-error.log*
+go-gossip/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+go-gossip/.vercel
+
+# typescript
+go-gossip/*.tsbuildinfo
+go-gossip/next-env.d.ts

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"os"
-
 	"github.com/gin-gonic/gin"
 	"github.com/mgjk04/cvwo-winter-assignment/api/internal/auth"
 	"github.com/mgjk04/cvwo-winter-assignment/api/internal/comment"
