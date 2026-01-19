@@ -52,6 +52,7 @@ func (h *authHandler) Signup(ctx *gin.Context){
 	_, err := h.s.RegisterUser(ctx, req.Username)
 	if err != nil {
 		ctx.Error(err)
+		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"username": req.Username})
 }

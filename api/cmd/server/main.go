@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 	"github.com/mgjk04/cvwo-winter-assignment/api/internal/auth"
 	"github.com/mgjk04/cvwo-winter-assignment/api/internal/comment"
 	"github.com/mgjk04/cvwo-winter-assignment/api/internal/middleware"
@@ -61,6 +62,11 @@ func main() {
 	authMiddleware := middleware.AuthMiddleware(authSvc)
 
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+    AllowOrigins:     []string{"http://localhost:3000"}, //remember to change the domain
+    AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+    AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
+    AllowCredentials: true,}))
 	r.Use(middleware.ErrorHandler())
 
 	//auth
@@ -68,7 +74,7 @@ func main() {
 	r.POST("/logout",authHandler.Logout)
 	r.POST("/signup",authHandler.Signup)
 
-	r.POST("/refresh", authMiddleware, authHandler.Refresh)
+	r.POST("/refresh", authHandler.Refresh)
 
 	//users
 	users := r.Group("/users")
