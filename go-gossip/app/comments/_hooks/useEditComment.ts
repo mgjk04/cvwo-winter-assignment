@@ -1,8 +1,8 @@
 import z from "zod";
-import { postFormSchema } from "../zod";
+import { commentFormSchema } from "../zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const editPost = (editURL: string) => async (values: z.infer<typeof postFormSchema>) => {
+const editComment = (editURL: string) => async (values: z.infer<typeof commentFormSchema>) => {
     const res = await fetch(editURL, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -10,14 +10,15 @@ const editPost = (editURL: string) => async (values: z.infer<typeof postFormSche
         credentials: "include"
     });
     if(!res.ok) throw new Error(String(res.status));
+    return res.json();
 }
 
-export default function useEditPost(editURL: string){
+export default function useEditComment(editURL: string){
     const client = useQueryClient();
     return useMutation({
-    mutationFn: editPost(editURL),
+    mutationFn: editComment(editURL),
     onSettled: () => {
-      client.invalidateQueries({ queryKey: ["post"] });
+      client.invalidateQueries({ queryKey: ["comment"] });
     },
   });
 }

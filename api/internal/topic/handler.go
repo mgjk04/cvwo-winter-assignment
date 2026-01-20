@@ -50,7 +50,7 @@ func (h *topicHandler) GetTopics(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.JSON(http.StatusOK, topics)
+	ctx.JSON(http.StatusOK, &TopicsReadRes{Topics: topics, Count: len(topics)})
 }
 
 func (h *topicHandler) CreateTopic(ctx *gin.Context){
@@ -92,13 +92,18 @@ func (h *topicHandler) UpdateTopic(ctx *gin.Context){
 		return
 	}
 
-	//verify ownership
 	req := &TopicUpdateReq{}
 	if err := ctx.ShouldBind(req); err != nil {
 		ctx.Error(generalErrors.ErrInvalid)
 		return
 	}
-	err = h.s.UpdateTopic(ctx, parsedUserID, &Topic{ID: topicID, TopicName: req.TopicName, Description: req.Description, AuthorID: req.AuthorID})
+	var finalAuthorID uuid.UUID
+	if req.AuthorID != uuid.Nil {
+		finalAuthorID = req.AuthorID
+		} else {
+			finalAuthorID = parsedUserID
+		}
+	err = h.s.UpdateTopic(ctx, parsedUserID, &Topic{ID: topicID, TopicName: req.TopicName, Description: req.Description, AuthorID: finalAuthorID})
 	if err != nil {
 		ctx.Error(err)
 		return

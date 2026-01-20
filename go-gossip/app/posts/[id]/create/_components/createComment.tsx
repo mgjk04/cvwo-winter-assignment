@@ -8,24 +8,21 @@ import FormHelperText from "@mui/material/FormHelperText";
 import { z } from "zod";
 import { FieldError, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { verb } from "../types";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
-import { postFormSchema } from "../zod";
-import { handleError } from "../utils"
-import useCreatePost from "../_hooks/useCreatePost";
+import { commentFormSchema } from "@/app/comments/zod";
+import useCreateComment from "@/app/comments/_hooks/useCreateComment";
+import { handleError } from "@/app/comments/utils";
 
 
-
-export default function ModifyPost(ModifyFormProps: {
-  verb: verb;
+export default function CreateComment(ModifyFormProps: {
   submitURL: string;
-  post?: z.infer<typeof postFormSchema>;
+  comment?: z.infer<typeof commentFormSchema>;
 }) {
-  const { mutate } = useCreatePost();
+  const { mutate } = useCreateComment(ModifyFormProps.submitURL);
 
-  async function onSubmit(values: z.infer<typeof postFormSchema>) {
+  async function onSubmit(values: z.infer<typeof commentFormSchema>) {
     mutate(values, {
       onError: (error) => {
         handleError(setError, error, () => mutate(values));
@@ -39,43 +36,30 @@ export default function ModifyPost(ModifyFormProps: {
     setError,
     handleSubmit,
   } = useForm({
-    resolver: zodResolver(postFormSchema),
+    resolver: zodResolver(commentFormSchema),
     defaultValues: {
-      title: ModifyFormProps.post?.title,
-      description: ModifyFormProps.post?.description,
+      content: ModifyFormProps.comment?.content || ""
     },
   });
 
   return (
-    <Box>
+        <Box>
       <Card>
         <CardContent>
-          <Typography className='strong' variant="h4">{ModifyFormProps.verb} Post</Typography>
+          <Typography className='strong' variant="h4">Create Comment</Typography>
           <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
             <Stack className="flex w-full gap-2.5">
               <TextField
-                {...register("title")}
+                {...register("content")}
                 fullWidth
-                id="title"
-                name="topicname"
-                label="Title"
+                id="content"
+                name="content"
+                label="Content"
                 variant="outlined"
                 required
                 placeholder="Share your thoughts"
-                error={!!errors.title || !!errors.root}
-                helperText={errors.title?.message}
-              />
-              <TextField
-                {...register("description")}
-                fullWidth
-                multiline
-                id="description"
-                name="description"
-                label="Description"
-                variant="outlined"
-                placeholder="Details?"
-                error={!!errors.description || !!errors.root}
-                helperText={errors.description?.message}
+                error={!!errors.content || !!errors.root}
+                helperText={errors.content?.message}
               />
               <FormHelperText error={!!errors.root}>{(Object.values(errors.root || {}) as FieldError[])[0]?.message}</FormHelperText>
               <CardActions>
@@ -84,7 +68,7 @@ export default function ModifyPost(ModifyFormProps: {
                   type="submit"
                   disabled={isSubmitting}
                 >
-                  {ModifyFormProps.verb}!
+                  Create!
                 </Button>
               </CardActions>
             </Stack>

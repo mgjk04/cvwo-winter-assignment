@@ -1,8 +1,8 @@
 "use client";
-import ModifyTopic from "../_components/modifyTopic";
-import { verb } from "../types";
+import CreateTopic from "./_components/createTopic";
+import "dotenv/config";
 
 export default function Page() {
-  const createTopicURL = "http://localhost:8080/topics/";
-  return <ModifyTopic verb={verb.Create} submitURL={createTopicURL} />;
+  const createTopicURL = process.env.API_URL + "/topics/";
+  return <CreateTopic submitURL={createTopicURL} />;
 }

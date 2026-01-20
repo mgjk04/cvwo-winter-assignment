@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import z from "zod";
-import { postFormSchema } from "../zod";
+import { commentFormSchema } from "../zod";
 
-const createPost = (createURL: string) => async (values: z.infer<typeof postFormSchema>) => {
+const createComment = (createURL: string) => async (values: z.infer<typeof commentFormSchema>) => {
   const res = await fetch(createURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -13,12 +13,12 @@ const createPost = (createURL: string) => async (values: z.infer<typeof postForm
   return res.json();
 };
 
-export default function useCreatePost(createURL: string) {
+export default function useCreateComment(createURL: string) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: createPost(createURL),
+    mutationFn: createComment(createURL),
     onSettled: () => {
-      client.invalidateQueries({ queryKey: ["post"] });
+      client.invalidateQueries({ queryKey: ["comment"] });
     },
   });
 }

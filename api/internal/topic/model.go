@@ -27,5 +27,10 @@ type TopicCreateReq struct {
 type TopicUpdateReq struct {
 	TopicName string `json:"topicname" binding:"required"`
 	Description string `json:"description" binding:"omitempty"`
-	AuthorID uuid.UUID `json:"author_id" binding:"required"`
+	AuthorID uuid.UUID `json:"author_id" binding:"omitempty"`
+}
+
+type TopicsReadRes struct {
+	Topics []*Topic `json:"topics"`
+	Count int `json:"count"`
 }

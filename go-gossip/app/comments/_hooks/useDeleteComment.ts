@@ -1,21 +1,19 @@
-import z from "zod";
-import { postFormSchema } from "../zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const editPost = (editURL: string) => async (values: z.infer<typeof postFormSchema>) => {
-    const res = await fetch(editURL, {
-        method: "PUT",
+const deleteComment = async (deleteURL: string) => {
+    const res = await fetch(deleteURL, {
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
         credentials: "include"
     });
     if(!res.ok) throw new Error(String(res.status));
+    return res.json();
 }
 
-export default function useEditPost(editURL: string){
+export default function useEditComment(deleteURL: string){
     const client = useQueryClient();
     return useMutation({
-    mutationFn: editPost(editURL),
+    mutationFn: () => deleteComment(deleteURL),
     onSettled: () => {
       client.invalidateQueries({ queryKey: ["post"] });
     },

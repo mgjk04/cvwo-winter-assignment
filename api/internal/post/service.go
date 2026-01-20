@@ -20,7 +20,6 @@ type postSvc struct {
 }
 
 func (s *postSvc) CreatePost(ctx context.Context, p *Post) (uuid.UUID, error) {
-	// this thing is in charge of assembbling the post object to send to repo
 	return s.r.Create(ctx, p);
 }
 

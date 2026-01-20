@@ -50,7 +50,7 @@ func (h *commentHandler) GetComments(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.JSON(http.StatusOK, comments)
+	ctx.JSON(http.StatusOK, &CommentReadRes{Comments: comments, Count: len(comments)})
 }
 
 func (h *commentHandler) CreateComment(ctx *gin.Context){
@@ -98,7 +98,7 @@ func (h *commentHandler) UpdateComment(ctx *gin.Context){
 		ctx.Error(generalErrors.ErrInvalid)
 		return
 	}
-	err = h.s.UpdateComment(ctx, parsedUserID, &Comment{ID: commentID, Content: req.Content, PostID: req.PostID, AuthorID: req.AuthorID})
+	err = h.s.UpdateComment(ctx, parsedUserID, &Comment{ID: commentID, Content: req.Content, PostID: req.PostID, AuthorID: parsedUserID})
 	if err != nil {
 		ctx.Error(err)
 		return

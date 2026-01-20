@@ -8,28 +8,34 @@ import FormHelperText from "@mui/material/FormHelperText";
 import { z } from "zod";
 import { FieldError, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { verb } from "../types";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
-import { topicFormSchema } from "../zod";
-import { handleError } from "../utils"
-import useCreateTopic from "../_hooks/useCreateTopic";
+import useEditPost from "@/app/posts/_hooks/useEditPost";
+import { postFormSchema } from "@/app/posts/zod";
+import { handleError } from "@/app/posts/utils";
 
-
-export default function ModifyTopic(ModifyFormProps: {
-  verb: verb;
+export default function ModifyPost(ModifyFormProps: {
   submitURL: string;
-  topic?: z.infer<typeof topicFormSchema>;
+  post?: z.infer<typeof postFormSchema>;
 }) {
-  const { mutate } = useCreateTopic();
+  const { mutate } = useEditPost(ModifyFormProps.submitURL);
 
-  async function onSubmit(values: z.infer<typeof topicFormSchema>) {
+  async function onSubmit(values: z.infer<typeof postFormSchema>) {
     mutate(values, {
       onError: (error) => {
-        handleError(setError, error, () => mutate(values));
-      }
-    })
+        handleError(setError, error, () =>
+          mutate(values, {
+            onError: (error) => {
+              console.error(error);
+              setError("root.auth", {
+                message: "Login to perform this action",
+              });
+            },
+          }),
+        );
+      },
+    });
   }
 
   const {
@@ -37,11 +43,12 @@ export default function ModifyTopic(ModifyFormProps: {
     formState: { errors, isSubmitting },
     setError,
     handleSubmit,
+    watch
   } = useForm({
-    resolver: zodResolver(topicFormSchema),
+    resolver: zodResolver(postFormSchema),
     defaultValues: {
-      topicname: ModifyFormProps.topic?.topicname,
-      description: ModifyFormProps.topic?.description,
+      title: ModifyFormProps.post?.title,
+      description: ModifyFormProps.post?.description,
     },
   });
 
@@ -49,20 +56,27 @@ export default function ModifyTopic(ModifyFormProps: {
     <Box>
       <Card>
         <CardContent>
-          <Typography className='strong' variant="h4">{ModifyFormProps.verb} Topic</Typography>
+          <Typography className="strong" variant="h4">
+            Edit Post
+          </Typography>
           <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
             <Stack className="flex w-full gap-2.5">
               <TextField
-                {...register("topicname")}
+                {...register("title")}
                 fullWidth
                 id="title"
-                name="topicname"
+                name="title"
                 label="Title"
                 variant="outlined"
                 required
-                placeholder="What to call the topic?"
-                error={!!errors.topicname || !!errors.root}
-                helperText={errors.topicname?.message}
+                placeholder="Share your thoughts"
+                error={!!errors.title || !!errors.root}
+                helperText={errors.title?.message}
+                defaultValue={ModifyFormProps.post?.title}
+                slotProps={{
+                  // eslint-disable-next-line react-hooks/incompatible-library
+                  inputLabel: { shrink: !!watch("title")},
+                }}
               />
               <TextField
                 {...register("description")}
@@ -72,18 +86,24 @@ export default function ModifyTopic(ModifyFormProps: {
                 name="description"
                 label="Description"
                 variant="outlined"
-                placeholder="What should others know about this?"
+                placeholder="Details?"
                 error={!!errors.description || !!errors.root}
                 helperText={errors.description?.message}
+                defaultValue={ModifyFormProps.post?.description}
+                slotProps={{
+                  inputLabel: { shrink: !!watch("description") },
+                }}
               />
-              <FormHelperText error={!!errors.root}>{(Object.values(errors.root || {}) as FieldError[])[0]?.message}</FormHelperText>
+              <FormHelperText error={!!errors.root}>
+                {(Object.values(errors.root || {}) as FieldError[])[0]?.message}
+              </FormHelperText>
               <CardActions>
                 <Button
                   variant="contained"
                   type="submit"
                   disabled={isSubmitting}
                 >
-                  {ModifyFormProps.verb}!
+                  Edit!
                 </Button>
               </CardActions>
             </Stack>

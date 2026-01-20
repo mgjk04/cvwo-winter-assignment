@@ -25,7 +25,7 @@ func (h *authHandler) Login(ctx *gin.Context){
 		ctx.Error(generalErrors.ErrInvalid)
 		return
 	}
-	accessToken, refreshToken, err := h.s.LoginUser(ctx, req.Username)
+	accessToken, refreshToken, userID, err := h.s.LoginUser(ctx, req.Username)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -34,7 +34,7 @@ func (h *authHandler) Login(ctx *gin.Context){
 	ctx.SetCookie("access_token", accessToken, 15 * 60, "/", "localhost", false, true)
 	//magic 12 h
 	ctx.SetCookie("refresh_token", refreshToken, 12 * 60 * 60, "/", "localhost", false, true)
-	ctx.JSON(http.StatusOK, gin.H{"username": req.Username})
+	ctx.JSON(http.StatusOK, gin.H{"user_id": userID, "username": req.Username})
 }
 func (h *authHandler) Logout(ctx *gin.Context){
 	//TODO: change domain

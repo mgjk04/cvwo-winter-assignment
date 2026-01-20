@@ -2,11 +2,7 @@ import z from "zod";
 import { topicFormSchema } from "../zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-
-
-const editURL = 'http://localhost:8080/posts';
-
-const editTopic = async (values: z.infer<typeof topicFormSchema>) => {
+const editTopic = (editURL: string) => async (values: z.infer<typeof topicFormSchema>) => {
     const res = await fetch(editURL, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -14,13 +10,12 @@ const editTopic = async (values: z.infer<typeof topicFormSchema>) => {
         credentials: "include"
     });
     if(!res.ok) throw new Error(String(res.status));
-    return res.json();
 }
 
-export default function useEditTopic(){
+export default function useEditTopic(editURL: string){
     const client = useQueryClient();
     return useMutation({
-    mutationFn: editTopic,
+    mutationFn: editTopic(editURL),
     onSettled: () => {
       client.invalidateQueries({ queryKey: ["topic"] });
     },

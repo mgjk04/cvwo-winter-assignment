@@ -11,6 +11,7 @@ type Comment struct {
 	CreatedAt time.Time `json:"created_at"`
 	PostID    uuid.UUID `json:"post_id"`
 	AuthorID  uuid.UUID `json:"author_id"`
+	AuthorName string `json:"authorname"` 
 }
 
 //NOTE: consider moving SearchQuery into its own file, repeated quite a bit 
@@ -29,4 +30,9 @@ type CommentUpdateReq struct {
 	Content string `json:"content" binding:"required"`
 	PostID uuid.UUID `json:"post_id" binding:"required"`
 	AuthorID uuid.UUID `json:"author_id" binding:"required"`
+}
+
+type CommentReadRes struct {
+	Comments []*Comment `json:"comments"`
+	Count int `json:"count"`
 }

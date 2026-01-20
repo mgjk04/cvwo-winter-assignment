@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import z from "zod";
 import { topicFormSchema } from "../zod";
+import "dotenv/config";
 
-const createURL = "http://localhost:8080/topics/";
+const createURL = process.env.API_URL + "/topics/";
 
 const createTopic = async (values: z.infer<typeof topicFormSchema>) => {
   const res = await fetch(createURL, {

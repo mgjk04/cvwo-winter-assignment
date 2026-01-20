@@ -1,8 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import { userCredentialsSchema } from "../../zod";
 import z from "zod";
+import {setCookie} from 'cookies-next';
 
-const loginURL = "http://localhost:8080/login";
+const loginURL = `${process.env.NEXT_PUBLIC_API_URL}/login`;
 
 const login = async (values: z.infer<typeof userCredentialsSchema>) => {
   const res = await fetch(loginURL, {
@@ -18,5 +19,9 @@ const login = async (values: z.infer<typeof userCredentialsSchema>) => {
 export default function useLogin() {
   return useMutation({
     mutationFn: login,
+    onSuccess: (data) => {
+      setCookie('user_id', data.user_id);
+      setCookie('username', data.username);
+    } 
   });
 }

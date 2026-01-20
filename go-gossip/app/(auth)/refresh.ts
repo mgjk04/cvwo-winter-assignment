@@ -1,4 +1,4 @@
-const refreshURL = 'http://localhost:8080/refresh'
+const refreshURL = `${process.env.NEXT_PUBLIC_API_URL}/refresh`;
 
 export const refresh = async () => {
     const res = await fetch(refreshURL, {

@@ -3,12 +3,12 @@ export enum verb {
   Edit =  'Edit',
 }
 
-export interface post {
+export interface comment {
   id: string;
-  title: string;
+  content: string;
   description: string;
   created_at: string;
-  topic_id: string;
+  post_id: string;
   author_id: string;
   authorname: string;
 }

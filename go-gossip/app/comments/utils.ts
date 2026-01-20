@@ -1,11 +1,11 @@
 import { HttpStatus } from "http-status-ts";
 import { UseFormSetError } from "react-hook-form";
+import { commentFormSchema } from "./zod";
 import z from "zod";
 import { refresh } from "../(auth)/refresh";
-import { postFormSchema } from "./zod";
 
 //ngl looks pretty messy
-export function handleError(setError: UseFormSetError<z.infer<typeof postFormSchema>>, error: Error, retry: () => void){
+export function handleError(setError: UseFormSetError<z.infer<typeof commentFormSchema>>, error: Error, retry: () => void){
     console.error(error);
     switch(parseInt(error.message)) {
         case HttpStatus.FORBIDDEN:
@@ -16,7 +16,6 @@ export function handleError(setError: UseFormSetError<z.infer<typeof postFormSch
                 refresh();
                 retry();
             } catch (error) {
-                //I dont like this but I'll improve it later 
                 console.log(error);
                 setError('root.auth', { message: "Login to perform this action"});
             }

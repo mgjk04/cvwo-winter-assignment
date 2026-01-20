@@ -28,14 +28,14 @@ func (r *commentRepo) Create(ctx context.Context, c *Comment) (uuid.UUID, error)
 }
 
 func (r *commentRepo) ReadByID(ctx context.Context, id uuid.UUID) (*Comment, error) {
-	query := `SELECT content, created_at, post_id, author_id FROM comments WHERE id=$1`
+	query := `SELECT content, comments.created_at, post_id, author_id, users.username FROM comments JOIN users ON author_id = users.id WHERE comments.id=$1`
 	p := &Comment{ID: id} 
-	err := r.db.QueryRow(ctx, query, id).Scan(&p.Content, &p.CreatedAt, &p.PostID, &p.AuthorID)
+	err := r.db.QueryRow(ctx, query, id).Scan(&p.Content, &p.CreatedAt, &p.PostID, &p.AuthorID, &p.AuthorName)
 	return p, generalErrors.PostgresqlErrorMap(err)
 }
 
 func (r *commentRepo) ReadByPostID(ctx context.Context, postID uuid.UUID, page int, limit int) ([]*Comment, error) {
-	query := `SELECT id, content, created_at, post_id, author_id FROM comments WHERE post_id=$1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`
+	query := `SELECT comments.id, content, comments.created_at, post_id, author_id, users.username FROM comments JOIN users ON author_id = users.id WHERE post_id=$1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`
 	rows, err := r.db.Query(ctx, query, postID, limit, (page - 1) * limit)
 	if err != nil {
 		return nil, generalErrors.PostgresqlErrorMap(err)
@@ -44,7 +44,7 @@ func (r *commentRepo) ReadByPostID(ctx context.Context, postID uuid.UUID, page i
 	comments := []*Comment{}
 	for rows.Next() {
 		c := &Comment{}
-		err := rows.Scan(&c.ID, &c.Content, &c.CreatedAt, &c.PostID, &c.AuthorID)
+		err := rows.Scan(&c.ID, &c.Content, &c.CreatedAt, &c.PostID, &c.AuthorID, &c.AuthorName)
 		if err != nil {
 			return nil, generalErrors.PostgresqlErrorMap(err)
 		}

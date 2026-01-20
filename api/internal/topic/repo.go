@@ -20,7 +20,6 @@ type topicRepo struct {
 	db *pgxpool.Pool
 }
 
-//TODO: error handler
 func (r *topicRepo) Create(ctx context.Context, t *Topic) (uuid.UUID, error) {
 	query := `INSERT INTO topics (topicname, description, author_id) VALUES ($1, $2, $3) RETURNING id`
 	var id uuid.UUID

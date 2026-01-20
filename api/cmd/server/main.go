@@ -92,7 +92,7 @@ func main() {
 
 	//posts
 	topics.GET("/:topicId/posts", postHandler.GetPosts)
-	topics.POST("/:topicId/posts", postHandler.CreatePost)
+	topics.POST("/:topicId/posts", authMiddleware, postHandler.CreatePost)
 
 	posts := r.Group("/posts")
 	posts.GET("/:postId", postHandler.GetPost)

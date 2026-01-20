@@ -5,6 +5,7 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "./globals.css";
 import Providers from "./providers";
+import "dotenv/config";
 
 export const metadata: Metadata = {
   title: "GO-GOSSIP",
@@ -16,6 +17,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body className={`antialiased`}>

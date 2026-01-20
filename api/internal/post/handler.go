@@ -49,7 +49,7 @@ func (h *postHandler) GetPosts(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	ctx.JSON(http.StatusOK, posts)
+	ctx.JSON(http.StatusOK, &PostReadRes{Posts: posts, Count: len(posts)})
 }
 
 func (h *postHandler) CreatePost(ctx *gin.Context){
@@ -97,7 +97,13 @@ func (h *postHandler) UpdatePost(ctx *gin.Context){
 		ctx.Error(generalErrors.ErrInvalid)
 		return
 	}
-	err = h.s.UpdatePost(ctx, parsedUserID, &Post{ID: postID, Title: req.Title, Description: req.Description, TopicID: req.TopicID, AuthorID: req.AuthorID})
+	var finalAuthorID uuid.UUID
+	if req.AuthorID != uuid.Nil {
+		finalAuthorID = req.AuthorID
+	} else {
+		finalAuthorID = parsedUserID
+	}
+	err = h.s.UpdatePost(ctx, parsedUserID, &Post{ID: postID, Title: req.Title, Description: req.Description, TopicID: req.TopicID, AuthorID: finalAuthorID})
 	if err != nil {
 		ctx.Error(err)
 		return

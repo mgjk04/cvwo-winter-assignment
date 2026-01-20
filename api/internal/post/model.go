@@ -12,6 +12,7 @@ type Post struct {
 	CreatedAt time.Time `json:"created_at"`
 	TopicID uuid.UUID `json:"topic_id"`
 	AuthorID uuid.UUID `json:"author_id"`
+	AuthorName string `json:"authorname"` 
 }
 
 type SearchQuery struct {
@@ -23,12 +24,17 @@ type SearchQuery struct {
 type PostCreateReq struct {
 	Title string `json:"title" binding:"required"`
 	Description string `json:"description" binding:"omitempty"`
-	AuthorID uuid.UUID `json:"author_id" binding:"required"`
+	AuthorID uuid.UUID `json:"author_id" binding:"omitempty"`
 	//topic_id not required as it is part of the route params
 }
 type PostUpdateReq struct {
 	Title string `json:"title" binding:"required"`
 	Description string `json:"description" binding:"omitempty"`
-	TopicID uuid.UUID `json:"topic_id" binding:"required"`
-	AuthorID uuid.UUID `json:"author_id" binding:"required"`
+	TopicID uuid.UUID `json:"topic_id" binding:"omitempty"`
+	AuthorID uuid.UUID `json:"author_id" binding:"omitempty"`
+}
+
+type PostReadRes struct {
+	Posts []*Post `json:"posts"`
+	Count int `json:"count"`
 }

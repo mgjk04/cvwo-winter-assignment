@@ -16,7 +16,7 @@ type Service interface {
 	ValidateAccessToken(tokenStr string) (*Claims, error)
 	ValidateRefreshToken(tokenStr string) (*Claims, error)
 	RegisterUser(ctx context.Context, username string) (uuid.UUID, error)
-	LoginUser(ctx context.Context, username string) (string, string, error)
+	LoginUser(ctx context.Context, username string) (string, string, uuid.UUID, error)
 }
 
 type authSvc struct {
@@ -75,20 +75,20 @@ func (s *authSvc) RegisterUser(ctx context.Context, username string) (uuid.UUID,
 	return s.UserSvc.RegisterUser(ctx, username)
 }
 
-func (s *authSvc) LoginUser(ctx context.Context, username string) (string, string, error){
+func (s *authSvc) LoginUser(ctx context.Context, username string) (string, string, uuid.UUID, error){
 	user, err := s.UserSvc.FindByUsername(ctx, username)
 	if err != nil {
-		return "", "", err
+		return "", "", uuid.Nil, err
 	}
 	accessToken, Aerr := s.GenAccessToken(user.ID)
 	if Aerr != nil {
-		return "", "", errors.Join(ErrAccessTokenGen, Aerr)
+		return "", "", uuid.Nil, errors.Join(ErrAccessTokenGen, Aerr)
 	}
 	refreshToken, Rerr := s.GenRefreshToken(user.ID)
 	if Rerr != nil {
-		return "", "", errors.Join(ErrRefreshTokenGen, Rerr)
+		return "", "", uuid.Nil, errors.Join(ErrRefreshTokenGen, Rerr)
 	}
-	return accessToken, refreshToken, nil
+	return accessToken, refreshToken, user.ID, nil
 }
 
 func NewAuthSvc(us user.Service, accessSecret string, refreshSecret string) *authSvc{
