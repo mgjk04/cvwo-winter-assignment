@@ -1,10 +1,19 @@
+"use client";
+import { Grid, Typography, Stack, Card, Link, Button, CardActions } from "@mui/material";
+
 export default function Home() {
-  
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        
-      </main>
-    </div>
+    <Stack>
+      <Grid>
+        <Card>
+          <Typography className="font-black" variant="h1">Go Gossip!</Typography>
+          <Card>
+            <CardActions>
+              <Button variant="contained" component={Link} href='/topics'>Find out about the Topics we share...</Button>
+            </CardActions>
+          </Card>
+        </Card>
+      </Grid>
+    </Stack>
   );
 }

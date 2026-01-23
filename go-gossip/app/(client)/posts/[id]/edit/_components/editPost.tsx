@@ -1,0 +1,121 @@
+"use  client";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import FormHelperText from "@mui/material/FormHelperText";
+import { z } from "zod";
+import { FieldError, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
+import useEditPost from "@/app/(client)/posts/_hooks/useEditPost";
+import { postFormSchema } from "@/app/(client)/posts/zod";
+import { handleError } from "@/app/(client)/posts/utils";
+
+export default function ModifyPost(ModifyFormProps: {
+  submitURL: string;
+  post?: z.infer<typeof postFormSchema>;
+}) {
+  const { mutate } = useEditPost(ModifyFormProps.submitURL);
+
+  async function onSubmit(values: z.infer<typeof postFormSchema>) {
+    mutate(values, {
+      onError: (error) => {
+        handleError(setError, error, () =>
+          mutate(values, {
+            onError: (error) => {
+              console.error(error);
+              setError("root.auth", {
+                message: "Login to perform this action",
+              });
+            },
+          }),
+        );
+      },
+    });
+  }
+
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    setError,
+    handleSubmit,
+    watch,
+  } = useForm({
+    resolver: zodResolver(postFormSchema),
+    defaultValues: {
+      title: ModifyFormProps.post?.title,
+      description: ModifyFormProps.post?.description,
+    },
+  });
+
+  return (
+    <Box>
+      <Card>
+        <CardContent>
+          <Typography className="strong" variant="h4">
+            Edit Post
+          </Typography>
+          <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+            <Stack className="flex w-full gap-2.5">
+              <TextField
+                {...register("title")}
+                fullWidth
+                id="title"
+                name="title"
+                label="Title"
+                variant="outlined"
+                required
+                placeholder="Share your thoughts"
+                error={!!errors.title || !!errors.root}
+                helperText={errors.title?.message}
+                defaultValue={ModifyFormProps.post?.title}
+                slotProps={{
+                  // eslint-disable-next-line react-hooks/incompatible-library
+                  inputLabel: {
+                    shrink: !!(watch("title") || ModifyFormProps.post?.title),
+                  },
+                }}
+              />
+              <TextField
+                {...register("description")}
+                fullWidth
+                multiline
+                id="description"
+                name="description"
+                label="Description"
+                variant="outlined"
+                placeholder="Details?"
+                error={!!errors.description || !!errors.root}
+                helperText={errors.description?.message}
+                defaultValue={ModifyFormProps.post?.description}
+                slotProps={{
+                  inputLabel: {
+                    shrink: !!(
+                      watch("description") || ModifyFormProps.post?.description
+                    ),
+                  },
+                }}
+              />
+              <FormHelperText error={!!errors.root}>
+                {(Object.values(errors.root || {}) as FieldError[])[0]?.message}
+              </FormHelperText>
+              <CardActions>
+                <Button
+                  variant="contained"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  Edit!
+                </Button>
+              </CardActions>
+            </Stack>
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+}

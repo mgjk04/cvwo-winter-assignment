@@ -84,7 +84,7 @@ func (h *authHandler) Refresh(ctx *gin.Context){
 	//magic 15 mins for now
 	//TODO: change domain
 	ctx.SetCookie("access_token", accessToken, 15 * 60, "/", "localhost", false, true)
-	ctx.Status(http.StatusNoContent)
+	ctx.JSON(http.StatusOK, gin.H{"user_id": userID})
 }
 
 func NewAuthHandler(s Service) *authHandler{

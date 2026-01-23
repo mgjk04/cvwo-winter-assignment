@@ -28,7 +28,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
-, "app/posts/_hooks/useDeletePost.ts"  ],
+    "**/*.mts",
+    "app/(client)/posts/_hooks/useDeletePost.ts"
+  ],
   "exclude": ["node_modules"]
 }

@@ -23,7 +23,7 @@ type SearchQuery struct {
 //DTOs
 type CommentCreateReq struct {
 	Content string `json:"content" binding:"required"`
-	AuthorID uuid.UUID `json:"author_id" binding:"required"`
+	AuthorID uuid.UUID `json:"author_id" binding:"omitempty"`
 	//post_id not required as it is part of the route params
 }
 type CommentUpdateReq struct {

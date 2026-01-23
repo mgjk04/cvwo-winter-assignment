@@ -20,7 +20,7 @@ CREATE TABLE Posts (
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     topic_id UUID NOT NULL,
-    FOREIGN KEY (topic_id) REFERENCES Topics(id),
+    FOREIGN KEY (topic_id) REFERENCES Topics(id) ON DELETE CASCADE,
     author_id UUID NOT NULL,
     FOREIGN KEY (author_id) REFERENCES Users(id)
 );
@@ -30,7 +30,7 @@ CREATE TABLE Comments (
     content TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     post_id UUID NOT NULL,
-    FOREIGN KEY (post_id) REFERENCES Posts(id),
+    FOREIGN KEY (post_id) REFERENCES Posts(id) ON DELETE CASCADE,
     author_id UUID NOT NULL,
     FOREIGN KEY (author_id) REFERENCES Users(id)
 );
