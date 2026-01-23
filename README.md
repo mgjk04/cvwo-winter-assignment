@@ -44,3 +44,6 @@ make dev
 ```
 npm run dev
 ``` 
+
+AI USE:
+- Gemini for searching up syntax of libraries, design patterns, best practices, meanings of error messages 
