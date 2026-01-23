@@ -47,8 +47,7 @@ export default function TopicPage({
   }, []);
 
   const readPostURL =
-    process.env.NEXT_PUBLIC_API_URL +
-    `/topics/${id}/posts?page=${dataState.page}&limit=${dataState.limit}`;
+    `${process.env.NEXT_PUBLIC_API_URL}/topics/${id}/posts?page=${dataState.page}&limit=${dataState.limit}`;
   const readTopicURL = `${process.env.NEXT_PUBLIC_API_URL}/topics/${id}`;
   const createPostURL = `/topics/${id}/create`;
   const editTopicURL = `/topics/${id}/edit`;

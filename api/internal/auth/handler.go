@@ -30,9 +30,9 @@ func (h *authHandler) Login(ctx *gin.Context){
 		ctx.Error(err)
 		return
 	}
-	//magic 15 mins for now
+
 	ctx.SetCookie("access_token", accessToken, 15 * 60, "/", "localhost", false, true)
-	//magic 12 h
+
 	ctx.SetCookie("refresh_token", refreshToken, 12 * 60 * 60, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{"user_id": userID, "username": req.Username})
 }
@@ -81,8 +81,7 @@ func (h *authHandler) Refresh(ctx *gin.Context){
 		return
 	} 
 	accessToken, err := h.s.GenAccessToken(userID)
-	//magic 15 mins for now
-	//TODO: change domain
+
 	ctx.SetCookie("access_token", accessToken, 15 * 60, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{"user_id": userID})
 }

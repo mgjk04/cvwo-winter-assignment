@@ -21,10 +21,7 @@ func main() {
 	dbURL := os.Getenv("DB_URL")
 	accessSecret := os.Getenv("ACCESS_SECRET")
 	refreshSecret := os.Getenv("REFRESH_SECRET")
-	// env := os.Getenv("ENV")
-	// if env == "DEV" {
-	// 	gin.SetMode(gin.DebugMode)
-	// }
+	domain := os.Getenv("DOMAIN")
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
         AddSource: true, // show file and line number
@@ -63,7 +60,7 @@ func main() {
 
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-    AllowOrigins:     []string{"http://localhost:3000"}, //remember to change the domain
+    AllowOrigins:     []string{domain}, //remember to change the domain
     AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
     AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
     AllowCredentials: true,}))
