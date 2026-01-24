@@ -37,7 +37,6 @@ func (h *authHandler) Login(ctx *gin.Context){
 	ctx.JSON(http.StatusOK, gin.H{"user_id": userID, "username": req.Username})
 }
 func (h *authHandler) Logout(ctx *gin.Context){
-	//TODO: change domain
 	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
 	ctx.Status(http.StatusNoContent)

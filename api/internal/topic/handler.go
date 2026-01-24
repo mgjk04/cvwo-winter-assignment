@@ -23,7 +23,6 @@ type topicHandler struct {
 //so gotta receive a pointer to handler cause its HUGE
 
 
-//TODO: add logging 
 func (h *topicHandler) GetTopic(ctx *gin.Context) {
 	topicID, err := uuid.Parse(ctx.Param("topicId"))
 	if err != nil {

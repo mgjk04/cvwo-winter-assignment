@@ -7,7 +7,6 @@ import (
 )
 
 //error declarations
-//TODO: move to dedicated file if big, including error handling logic
 var (
 	ErrDBConn = errors.New("database connection error")
 	ErrDBconfig = errors.New("database configuration error")
