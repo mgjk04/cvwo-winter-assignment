@@ -1,3 +1,4 @@
+Name: Goh Jwee Khiang, Marcus
 Setup instructions:
 
 PostgreSQL:
